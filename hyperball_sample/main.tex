@@ -1,0 +1,183 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amsmath,amssymb}
+\usepackage{ctex} 
+\usepackage{comment} 
+\usepackage{algorithm}
+\usepackage[utf8]{inputenc}
+
+\usepackage{tabularx}    % 自动换行的列
+\usepackage{xcolor}      % 颜色
+\usepackage{tcolorbox}   % 美观的框
+\usepackage{geometry}
+\usepackage{setspace}    % 可选：调整行距
+\geometry{margin=1in}
+
+\usepackage{algpseudocode}
+\title{hyperball sample}
+\author{pengfei chen}
+\date{March 2026}
+
+% 解释文字的默认字号（可选值示例：\scriptsize \footnotesize \small \normalsize \large）
+\newcommand{\Explainsize}{\normalsize}
+% 解释文字颜色（用 xcolor 的混合比例）
+\newcommand{\ExplainColor}{black!85}
+% 每条解释与下一条的垂直空白（看需要调大或调小）
+\newcommand{\ExplainVSkip}{12pt}
+% ==============================
+% 每行代码 + 下面解释的宏：参数1=行号，参数2=伪代码（数学模式），参数3=解释（可以包含换行）
+\newcommand{\CodeItem}[3]{%
+  \noindent\begin{tabularx}{\textwidth}{r X}
+    \textbf{#1} & $\displaystyle #2$ \\[6pt]
+    & {\setlength{\parindent}{0pt}\Explainsize\color{\ExplainColor}\parbox[t]{\hsize}{#3}} \\[\ExplainVSkip]
+  \end{tabularx}%
+}
+
+
+
+
+
+\begin{document}
+
+\maketitle
+
+\section{算法描述}
+
+    我们的目标是均匀采样高维球内部的离散整数点，也即
+    \[
+    S=\{(y_1,\dots,y_n)\in\mathbb{Z}^n:\ y_1^2+\cdots+y_n^2 \le R^2\}.
+    \]
+    我们的方案需要求 $n \geq {2}^{10} $ ，  $R \geq {2}^{20} $ ，一个简单的办法是
+先随机取边长为2R的高维立方体整数点，然后通过计算模 拒绝成 高维球内的整数点。
+
+\begin{comment}
+\begin{algorithm}
+  \caption{枚举立方体格点并通过模长拒绝筛选}
+  \begin{algorithmic}[1]
+    \State  $(y_1,\ldots,y_{n}) \leftarrow \{ -R , \dots  ,0,\dots , R  \} ^n $ 
+    \If{$\|(y_1,\ldots,y_n)\| \leq  R$}
+        \State \textbf{return} $(y_1,y_2,\ldots,y_n)$
+      \Else
+        \State \textbf{restart} 
+      \EndIf
+  \end{algorithmic}
+\end{algorithm}
+\end{comment}
+
+
+    虽然这个算法能够生成完美的离散高维球均匀分布，但是这个简单的方法是无效的，因为这个算法的拒绝率随着维数$n$的升高而升高，当$n \geq {2}^{10} $ 时，拒绝率大于$1-2^{-1000}$。
+    
+    当n和R较大时,目前并没有高效的生成完美的均匀离散高维球的方法，所以只能采用近似的算法。
+    
+
+ 
+\begin{algorithm}
+  \caption{}
+  \begin{algorithmic}[1]
+      \State $(y_1,\ldots,y_{n+2}) \leftarrow D_\sigma ^n $
+      \State $(y_1,\ldots,y_{n+2}) \leftarrow (y_1,\ldots,y_{n+2})/\sigma$
+      \State $(y_1,\ldots,y_n) \leftarrow (NB + \Delta)\;\cdot\;
+             \dfrac{(y_1,\ldots,y_n)}{\sqrt{\sum_{i=1}^{\,n+2} y_i^2}}$
+      \State $(y_1,\ldots,y_n) \leftarrow
+             \big(\lfloor y_1\rceil , \lfloor  y_2 \rceil ,\ldots,\lfloor  y_n\rceil\big)$
+      \If{$\|(y_1,\ldots,y_n)\| \leq  NB$}
+        \State \textbf{return} $(y_1,y_2,\ldots,y_n)$
+      \Else
+        \State \textbf{restart} 
+      \EndIf
+  \end{algorithmic}
+\end{algorithm}
+
+\cite{voelker2017efficiently}中介绍了一种将连续的高斯分布通过简单拉伸产生连续高维球分布的方法，可以借鉴这个思路去采样离散高维球。由于计算机精度有限，不可能取到连续高斯分布，我们采用离散高斯分布去近似连续高斯，从而近似高维球。
+ 
+
+
+
+如上所示，算法的执行过程比较简单。根据签名方案的要求，这里取$B = 10000 $ , 维数$n=1536$，$ \Delta = 20 \geq  \frac{\sqrt{n}}{2} \approx 19.6 $作为示例进行分析。
+
+\section{拒绝率分析}
+
+不难看出,该算法运行一次成功输出向量的概率,等于半径为$NB$的球的体积比上半径为$NB + \Delta$的球的体积，所以
+
+\[
+\text{reject rate} \approx 1 - \left(\frac{NB}{NB+\Delta}\right)^n \approx \frac{n\Delta}{NB+\Delta}
+\]
+
+
+为了使得该算法的拒绝率很小, 需要取足够大的$N$，这里我们取 $N \approx \frac{2^{24}}{B} \approx 1677.72$ ,此时算法的拒绝率约为0.1829\%，$NB+\Delta = 2^{24}$。 $NB+\Delta$每增大一倍，拒绝率大致相应减小一倍。
+
+\section{离散高斯采样}
+
+   算法第一步需要采样离散高斯分布$ D_\sigma ^n $，我们这里取$\sigma= 2^{p}$ 。
+   
+   离散高斯分布的样本空间为所有整数，但是由于高斯分布主要集中在均值附近，所以我们可以将其截断到一定的范围内，从而得到近似的离散高斯分布$\overline{D}_\sigma$。
+
+   采样$\overline{D}_\sigma$使用一个标准的技巧\cite{ducas2013lattice,rossi2020extended} ：先查CDT表采一个的标准差较小的离散高斯，通过放大加上拒绝采样获得标准差较大的离散高斯分布。
+
+   这里产生误差的地方有两个，一个是标准差较小的离散高斯分布不是完美的，另一个是计算拒绝率exp时精度是有限的。
+   
+   参考\cite{howe2020isochronous,prest2017sharper}中的分析，我们需要控制标准差较小的真实离散高斯分布与完美分布之间的雷尼差，以及exp计算时的相对误差。
+
+\section{球采样相对误差分析}
+
+\begin{tcolorbox}[colback=white, colframe=gray!30, boxrule=0.6pt, arc=3pt, left=6pt, right=6pt]
+% 示例：把原来 7 行伪代码放进来，每条解释写成 2-4 句即可自动换行
+\CodeItem{1}{(y_1,\dots,y_{n+2}) \leftarrow D^n_\sigma}{ 首先第一步取标准差$\sigma= 2^{p}$的离散高斯分布，由于高斯分布采样到大于16倍标准差的概率可忽略，所以这里$(y_1,\dots,y_{n+2})$均取为$p+5$位的定点数。}
+\\
+\newline
+
+\CodeItem{2}{(y_1,\dots,y_{n+2}) \leftarrow (y_1,\dots,y_{n+2})/\sigma}{把采样得到的向量按标准差 \(\sigma\) 缩放，使每个分量近似于取自连续标准正态分布\( \mathcal{N}(0,1) \)，此时$y_i$与完美的\( \mathcal{N}(0,1) \)分布的绝对误差$\epsilon_1 \leq 2^{-p-1}$。}
+\\
+\newline
+
+\CodeItem{3}{(y_1,\dots,y_n) \leftarrow  \dfrac{(y_1,\dots,y_n)}{\sqrt{\sum_{i=1}^{n+2} y_i^2}}}{将$(y_1,\dots,y_{n})$转为半径为1的高维球内的向量，参考\cite{cheon2024haetae}G.2中的分析计算，此时每一个分量$y_i$与半径为1的连续球对应分量的绝对误差$\epsilon_2 \leq 2^{-p+9}$}。
+\\
+\newline
+
+
+\CodeItem{4}{(y_1,\dots,y_{n}) \leftarrow (NB+\Delta) \cdot (y_1,\dots,y_{n})}{对每一个分量$y_i$乘以$NB+\Delta$会以$NB+\Delta$倍放大绝对误差，最终得到的分布与完美的均匀离散高维球分布间的相对误差:
+
+\[
+\begin{aligned}
+\delta &\le 1 - \bigl(1 - 2(NB+\Delta)\,\epsilon_2\bigr)^n \\[4pt]
+       &\le 2\,n\,\epsilon_2\,(NB+\Delta) \\[4pt]
+       &\le 2\,n\,2^{-p+9}\,(NB+\Delta).
+\end{aligned}
+\]
+
+ 参考\cite{prest2017sharper}中对Relative error的分析，对于$\lambda \le 256 $以及 $q_s \le 2^{80} $（商密要求），$\delta$需要小于$2^{-45}$，即：
+\[
+\begin{aligned}
+        2\,n\,2^{-p+9}\,(NB+\Delta) &\le 2^{-45} 
+\end{aligned}
+\]
+  若取定$NB+\Delta = 2^{24}$，$n=1536$，则有：
+
+  \[
+\begin{aligned}
+        2*1536*2^{-p+9+24} &\le 2^{-45}  \\[4pt]
+        89.585 & \le p 
+\end{aligned}
+\]
+ 
+}
+% 其它行...
+\end{tcolorbox}
+   
+
+\section{小结}
+
+    如果可以接受采样算法的拒绝率约为0.1829\%，则高斯采样的标准差取$2^{90}$即可满足商密要求且通过严格证明，此时计算过程中取96比特定点数也不超过用3个32位整数的组合方式，似乎不会引入太大的额外开销。
+    
+    若要求更低的拒绝率则需要取更高的标准差。
+
+
+
+
+
+\bibliographystyle{alpha}
+\bibliography{ref}
+
+\end{document}
+
+

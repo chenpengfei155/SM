@@ -1,0 +1,34 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{CCD{\etalchar{+}}24}
+
+\bibitem[CCD{\etalchar{+}}24]{cheon2024haetae}
+Jung~Hee Cheon, Hyeongmin Choe, Julien Devevey, Tim G{\"u}neysu, Dongyeon Hong, Markus Krausz, Georg Land, Marc M{\"o}ller, Damien Stehl{\'e}, and MinJune Yi.
+\newblock Haetae: Shorter lattice-based fiat-shamir signatures.
+\newblock {\em IACR Transactions on Cryptographic Hardware and Embedded Systems}, 2024(3):25--75, 2024.
+
+\bibitem[DDLL13]{ducas2013lattice}
+L{\'e}o Ducas, Alain Durmus, Tancr{\`e}de Lepoint, and Vadim Lyubashevsky.
+\newblock Lattice signatures and bimodal gaussians.
+\newblock In {\em Annual Cryptology Conference}, pages 40--56. Springer, 2013.
+
+\bibitem[HPRR20]{howe2020isochronous}
+James Howe, Thomas Prest, Thomas Ricosset, and M{\'e}lissa Rossi.
+\newblock Isochronous gaussian sampling: from inception to implementation: With applications to the falcon signature scheme.
+\newblock In {\em International Conference on Post-Quantum Cryptography}, pages 53--71. Springer, 2020.
+
+\bibitem[Pre17]{prest2017sharper}
+Thomas Prest.
+\newblock Sharper bounds in lattice-based cryptography using the r{\'e}nyi divergence.
+\newblock In {\em International Conference on the Theory and Application of Cryptology and Information Security}, pages 347--374. Springer, 2017.
+
+\bibitem[Ros20]{rossi2020extended}
+M{\'e}lissa Rossi.
+\newblock {\em Extended security of lattice-based cryptography}.
+\newblock PhD thesis, Universit{\'e} Paris sciences et lettres, 2020.
+
+\bibitem[VGS17]{voelker2017efficiently}
+Aaron~R Voelker, Jan Gosmann, and Terrence~C Stewart.
+\newblock Efficiently sampling vectors and coordinates from the n-sphere and n-ball.
+\newblock {\em Centre for Theoretical Neuroscience-Technical Report}, 1(2017), 2017.
+
+\end{thebibliography}
